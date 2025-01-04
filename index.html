@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test GitHub Pages</title>
+  <script>
+    // Embed script to dynamically load the external JavaScript
+    (function () {
+      console.log('Embed script executed'); // Log to confirm the embed script runs
+      var script = document.createElement('script');
+      script.src = 'https://danielhbaek.github.io/test/seoscript.js'; // Update with your GitHub Pages URL
+      script.async = true;
+      script.onload = function () {
+        console.log('External script loaded successfully');
+      };
+      script.onerror = function () {
+        console.error('Failed to load external script');
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
+</head>
+<body>
+  <h1>Test GitHub Pages</h1>
+  <p>This is a simple test page to ensure the JavaScript file is loaded correctly.</p>
+</body>
+</html>
