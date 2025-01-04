@@ -14,7 +14,7 @@
         return response.text();
       })
       .then(data => {
-        console.log('Fetched XML data:', data); // Log raw XML content
+        console.log('Fetched XML data:', data); // Log raw XML content test
 
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data, 'application/xml');
