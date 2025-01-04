@@ -35,6 +35,9 @@
         } else {
           console.warn('No matching title found for the current URL');
         }
+
+        // Add the new functionality after the title is updated
+        addLinkToProductFeed();
       })
       .catch(error => console.error('Error fetching or processing the XML file:', error));
   }
@@ -57,6 +60,33 @@
 
   function normalizeURL(url) {
     return url.replace(/\/$/, ''); // Normalize by removing trailing slash
+  }
+
+  // New function: Add a link to the first instance of "product feed"
+  function addLinkToProductFeed() {
+    const targetText = 'product feed';
+    const linkURL = 'https://www.feedseo.com/';
+    const paragraphs = document.querySelectorAll('p'); // Select all paragraphs on the page
+
+    for (let i = 0; i < paragraphs.length; i++) {
+      const paragraph = paragraphs[i];
+      const paragraphText = paragraph.innerHTML;
+
+      // Find the first instance of "product feed"
+      const index = paragraphText.toLowerCase().indexOf(targetText);
+      if (index !== -1) {
+        console.log(`Found "${targetText}" in paragraph:`, paragraphText);
+
+        // Replace the first instance with a link
+        const beforeText = paragraphText.slice(0, index);
+        const matchText = paragraphText.slice(index, index + targetText.length);
+        const afterText = paragraphText.slice(index + targetText.length);
+
+        paragraph.innerHTML = `${beforeText}<a href="${linkURL}" target="_blank">${matchText}</a>${afterText}`;
+        console.log(`Updated paragraph:`, paragraph.innerHTML);
+        break; // Stop after updating the first instance
+      }
+    }
   }
 
   updateTitle();
