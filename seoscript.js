@@ -1,32 +1,36 @@
 (function () {
-  const textFileURL = 'https://yourdomain.com/textfile.txt';
+  const xmlFileURL = 'https://raw.githubusercontent.com/danielhbaek/test/refs/heads/main/mappings.xml';
 
   function updateTitle() {
     const currentURL = window.location.href;
 
-    fetch(textFileURL)
+    fetch(xmlFileURL)
       .then(response => response.text())
       .then(data => {
-        const urlMappings = parseTextFile(data);
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data, 'application/xml');
+        const urlMappings = parseXMLFile(xmlDoc);
         const newTitle = urlMappings[currentURL];
 
         if (newTitle) {
           document.title = newTitle;
         }
       })
-      .catch(error => console.error('Error fetching or parsing the text file:', error));
+      .catch(error => console.error('Error fetching or parsing the XML file:', error));
   }
 
-  function parseTextFile(data) {
-    const lines = data.split('\n');
+  function parseXMLFile(xmlDoc) {
+    const urlElements = xmlDoc.getElementsByTagName('url');
     const mappings = {};
 
-    lines.forEach(line => {
-      const [url, title] = line.split('|').map(item => item.trim());
-      if (url && title) {
-        mappings[url] = title;
+    for (let i = 0; i < urlElements.length; i++) {
+      const location = urlElements[i].getElementsByTagName('location')[0].textContent;
+      const title = urlElements[i].getElementsByTagName('title')[0].textContent;
+
+      if (location && title) {
+        mappings[location.trim()] = title.trim();
       }
-    });
+    }
 
     return mappings;
   }
