@@ -21,31 +21,28 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Replace text in safe areas only
-function safeReplaceTextContent() {
-  console.log("Running text replacement...");
+// Function to replace text content safely inside <div> tags
+function replaceTextInDivs() {
+  console.log("Running text replacement inside <div> elements...");
 
-  // Use querySelectorAll to find visible static content
-  const elements = document.querySelectorAll("div, span, p, a, td");
+  // Select all div elements
+  const divs = document.querySelectorAll("div");
 
-  elements.forEach((element) => {
-    if (element.childNodes.length === 1 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
-      const originalText = element.textContent.trim();
-
-      // Skip empty or short text
-      if (!originalText || originalText.length < 3) return;
+  divs.forEach((div) => {
+    if (div.childNodes.length === 1 && div.childNodes[0].nodeType === Node.TEXT_NODE) {
+      const originalText = div.textContent.trim();
 
       for (const [original, replacement] of Object.entries(replacements)) {
         if (originalText.includes(original)) {
-          console.log(`Replacing "${original}" with "${replacement}" in element:`, element);
-          element.textContent = originalText.replace(new RegExp(original, "g"), replacement);
+          console.log(`Replacing "${original}" with "${replacement}" in element:`, div);
+          div.textContent = originalText.replace(new RegExp(original, "g"), replacement);
         }
       }
     }
   });
 }
 
-// Observe changes and only run replacements in finalized content areas
+// Observe changes and replace text only in <div> tags
 function observeAppElement() {
   const app = document.getElementById("app");
 
@@ -53,18 +50,12 @@ function observeAppElement() {
     console.log("App element detected: Setting up MutationObserver");
 
     // Initial replacement
-    safeReplaceTextContent();
+    replaceTextInDivs();
 
     // Set up a MutationObserver to monitor changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            console.log("New element added. Running replacement...");
-            safeReplaceTextContent();
-          }
-        });
-      });
+    const observer = new MutationObserver(() => {
+      console.log("Mutation detected, re-running text replacement in <div> elements...");
+      replaceTextInDivs();
     });
 
     // Observe the #app element and its subtree
