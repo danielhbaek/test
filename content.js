@@ -1,9 +1,9 @@
 // Define a mapping of text to replace with pet supply-related examples
 const replacements = {
-  "Blog": "Category",
-  "Tools": "Product",
-  "FAQ": "Blog",
-  "PIM": "FAQ",
+  "Blog": "Pet Care Blog",
+  "Tools": "Pet Care Tools",
+  "FAQ": "Pet FAQ",
+  "PIM": "Pet Inventory Management",
   "/tools/ai-content-detector": "/products/dog-food-detector",
   "/blog/chatgpt-detector-tools": "/blog/top-dog-training-tools",
   "/blog/ai-replacing-jobs-statistics": "/blog/pet-adoption-statistics",
@@ -21,7 +21,21 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Loop through each replacement and apply changes
-for (const [original, replacement] of Object.entries(replacements)) {
-  document.body.innerHTML = document.body.innerHTML.replaceAll(original, replacement);
+// Function to walk through all text nodes in the DOM
+function replaceTextInNode(node) {
+  for (const [original, replacement] of Object.entries(replacements)) {
+    node.nodeValue = node.nodeValue.replace(new RegExp(original, 'g'), replacement);
+  }
 }
+
+// Walk through the DOM and replace text content
+function walkDOM(node) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    replaceTextInNode(node);
+  } else {
+    node.childNodes.forEach(walkDOM);
+  }
+}
+
+// Start replacing text on page load
+walkDOM(document.body);
