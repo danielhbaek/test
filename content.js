@@ -21,7 +21,7 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Function to log and replace text in a node
+// Function to replace text in a node and log it
 function replaceTextInNode(node) {
   for (const [original, replacement] of Object.entries(replacements)) {
     if (node.nodeValue.includes(original)) {
@@ -36,7 +36,7 @@ function walkDOM(node) {
   if (node.nodeType === Node.TEXT_NODE) {
     console.log(`Text node detected: "${node.nodeValue.trim()}"`);
     replaceTextInNode(node);
-  } else {
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
     node.childNodes.forEach(walkDOM);
   }
 }
@@ -56,7 +56,7 @@ function observeAppElement() {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
-            console.log("New element added to #app:", node);
+            console.log("New element added:", node);
             walkDOM(node);
           } else if (node.nodeType === Node.TEXT_NODE) {
             console.log("New text node added:", node.nodeValue.trim());
@@ -70,7 +70,8 @@ function observeAppElement() {
     observer.observe(app, { childList: true, subtree: true });
     console.log("MutationObserver started for #app");
   } else {
-    console.error("#app element not found! Is the page fully loaded?");
+    console.error("#app element not found! Retrying in 1 second...");
+    setTimeout(observeAppElement, 1000); // Retry after 1 second if #app is not found
   }
 }
 
