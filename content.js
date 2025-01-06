@@ -21,7 +21,13 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Function to replace text in a node and log it
+// Alert to confirm the script is running
+alert("Content script is running on this page!");
+
+// Log the current URL to confirm the script is attached to the right page
+console.log("Content script loaded on:", window.location.href);
+
+// Function to replace text in a node
 function replaceTextInNode(node) {
   for (const [original, replacement] of Object.entries(replacements)) {
     if (node.nodeValue.includes(original)) {
@@ -53,6 +59,7 @@ function observeAppElement() {
 
     // Set up a MutationObserver to monitor for changes
     const observer = new MutationObserver((mutations) => {
+      console.log("MutationObserver triggered:", mutations);
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
