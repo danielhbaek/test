@@ -21,10 +21,12 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
+// Log that the script has loaded
+console.log("Content script loaded!");
+
 // Function to replace text in a node recursively
 function replaceTextRecursively(node) {
   if (node.nodeType === Node.TEXT_NODE) {
-    // Replace text in the text node
     const originalText = node.nodeValue.trim();
     for (const [original, replacement] of Object.entries(replacements)) {
       if (originalText.includes(original)) {
@@ -33,7 +35,6 @@ function replaceTextRecursively(node) {
       }
     }
   } else if (node.nodeType === Node.ELEMENT_NODE) {
-    // Traverse child nodes
     node.childNodes.forEach((child) => replaceTextRecursively(child));
   }
 }
@@ -42,7 +43,6 @@ function replaceTextRecursively(node) {
 function replaceTextInDivs() {
   console.log("Running text replacement...");
   const divs = document.querySelectorAll("div");
-
   divs.forEach((div) => {
     replaceTextRecursively(div);
   });
@@ -73,8 +73,26 @@ function observeAppElement() {
   }
 }
 
+// Start replacement loop as a fallback for React rendering delays
+function startReplacementLoop() {
+  setInterval(() => {
+    console.log("Retrying text replacement...");
+    replaceTextInDivs();
+  }, 3000); // Retry every 3 seconds
+}
+
 // Wait for the DOM to fully load
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM fully loaded, starting script...");
-  observeAppElement();
+  try {
+    observeAppElement();
+  } catch (error) {
+    console.error("Error in observeAppElement:", error);
+  }
+
+  try {
+    startReplacementLoop();
+  } catch (error) {
+    console.error("Error in startReplacementLoop:", error);
+  }
 });
