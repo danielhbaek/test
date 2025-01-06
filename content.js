@@ -21,30 +21,25 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Alert to confirm the script is running
-alert("Content script is running on this page!");
-
 // Log the current URL to confirm the script is attached to the right page
 console.log("Content script loaded on:", window.location.href);
 
-// Function to replace text in a node
-function replaceTextInNode(node) {
-  for (const [original, replacement] of Object.entries(replacements)) {
-    if (node.nodeValue.includes(original)) {
-      console.log(`Replacing "${original}" with "${replacement}"`);
-      node.nodeValue = node.nodeValue.replace(new RegExp(original, 'g'), replacement);
+// Function to replace text content
+function replaceTextContent() {
+  console.log("Running text replacement...");
+  
+  // Select all text-containing elements (e.g., div, span, p, a, td)
+  const elements = document.querySelectorAll("div, span, p, a, td");
+  
+  elements.forEach((element) => {
+    // Loop through replacements and apply them if the text matches
+    for (const [original, replacement] of Object.entries(replacements)) {
+      if (element.innerText && element.innerText.includes(original)) {
+        console.log(`Replacing "${original}" with "${replacement}" in element:`, element);
+        element.innerText = element.innerText.replace(new RegExp(original, "g"), replacement);
+      }
     }
-  }
-}
-
-// Walk through the DOM and replace text
-function walkDOM(node) {
-  if (node.nodeType === Node.TEXT_NODE) {
-    console.log(`Text node detected: "${node.nodeValue.trim()}"`);
-    replaceTextInNode(node);
-  } else if (node.nodeType === Node.ELEMENT_NODE) {
-    node.childNodes.forEach(walkDOM);
-  }
+  });
 }
 
 // Observe the #app element for dynamic changes
@@ -52,25 +47,15 @@ function observeAppElement() {
   const app = document.getElementById("app");
 
   if (app) {
-    console.log("App element detected: Starting text replacement");
+    console.log("App element detected: Setting up MutationObserver");
 
-    // Replace text in the initial render
-    walkDOM(app);
+    // Run the replacement initially
+    replaceTextContent();
 
     // Set up a MutationObserver to monitor for changes
-    const observer = new MutationObserver((mutations) => {
-      console.log("MutationObserver triggered:", mutations);
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            console.log("New element added:", node);
-            walkDOM(node);
-          } else if (node.nodeType === Node.TEXT_NODE) {
-            console.log("New text node added:", node.nodeValue.trim());
-            replaceTextInNode(node);
-          }
-        });
-      });
+    const observer = new MutationObserver(() => {
+      console.log("Mutation detected, re-running text replacement...");
+      replaceTextContent();
     });
 
     // Observe changes in the #app element and its subtree
@@ -81,6 +66,12 @@ function observeAppElement() {
     setTimeout(observeAppElement, 1000); // Retry after 1 second if #app is not found
   }
 }
+
+// Fallback: Run text replacement on an interval (React-safe)
+setInterval(() => {
+  console.log("Running periodic text replacement...");
+  replaceTextContent();
+}, 3000); // Runs every 3 seconds
 
 // Wait for the DOM to fully load
 document.addEventListener("DOMContentLoaded", () => {
