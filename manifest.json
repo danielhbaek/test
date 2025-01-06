@@ -4,14 +4,15 @@
   "version": "1.0",
   "description": "Change text on specific URLs.",
   "permissions": [
+    "activeTab",
     "scripting"
   ],
   "host_permissions": [
-    "https://app.seo.ai/page-analytics*"
+    "https://app.seo.ai/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://app.seo.ai/page-analytics*"],
+      "matches": ["https://app.seo.ai/*"],
       "js": ["content.js"]
     }
   ]
