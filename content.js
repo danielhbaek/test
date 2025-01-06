@@ -1,6 +1,6 @@
 // Define a mapping of text to replace with pet supply-related examples
 const replacements = {
-  "Analytics": "Pet Care Blog",
+  "Blog": "Pet Care Blog",
   "Tools": "Pet Care Tools",
   "FAQ": "Pet FAQ",
   "PIM": "Pet Inventory Management",
@@ -24,7 +24,9 @@ const replacements = {
 // Function to replace text in a node
 function replaceTextInNode(node) {
   for (const [original, replacement] of Object.entries(replacements)) {
-    node.nodeValue = node.nodeValue.replace(new RegExp(original, 'g'), replacement);
+    if (node.nodeValue.includes(original)) {
+      node.nodeValue = node.nodeValue.replace(new RegExp(original, 'g'), replacement);
+    }
   }
 }
 
@@ -37,21 +39,33 @@ function walkDOM(node) {
   }
 }
 
-// Observe the DOM for dynamic changes
-const observer = new MutationObserver((mutations) => {
-  mutations.forEach((mutation) => {
-    mutation.addedNodes.forEach((node) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        walkDOM(node);
-      } else if (node.nodeType === Node.TEXT_NODE) {
-        replaceTextInNode(node);
-      }
+// Observe the #app element for dynamic changes
+function observeAppElement() {
+  const app = document.getElementById("app");
+
+  if (app) {
+    // Replace text in the initial render
+    walkDOM(app);
+
+    // Set up a MutationObserver to monitor for changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            walkDOM(node);
+          } else if (node.nodeType === Node.TEXT_NODE) {
+            replaceTextInNode(node);
+          }
+        });
+      });
     });
-  });
-});
 
-// Start observing the DOM
-observer.observe(document.body, { childList: true, subtree: true });
+    // Observe changes in the #app element and its subtree
+    observer.observe(app, { childList: true, subtree: true });
+  } else {
+    console.error("#app element not found!");
+  }
+}
 
-// Perform initial walk through the DOM
-walkDOM(document.body);
+// Wait for the DOM to fully load
+document.addEventListener("DOMContentLoaded", observeAppElement);
