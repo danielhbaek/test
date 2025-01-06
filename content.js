@@ -21,28 +21,34 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Function to replace text content safely inside <div> tags
-function replaceTextInDivs() {
-  console.log("Running text replacement inside <div> elements...");
+// Function to replace text in a node recursively
+function replaceTextRecursively(node) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    // Replace text in the text node
+    const originalText = node.nodeValue.trim();
+    for (const [original, replacement] of Object.entries(replacements)) {
+      if (originalText.includes(original)) {
+        console.log(`Replacing "${original}" with "${replacement}"`);
+        node.nodeValue = originalText.replace(new RegExp(original, "g"), replacement);
+      }
+    }
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
+    // Traverse child nodes
+    node.childNodes.forEach((child) => replaceTextRecursively(child));
+  }
+}
 
-  // Select all div elements
+// Function to replace text content within specific parent elements
+function replaceTextInDivs() {
+  console.log("Running text replacement...");
   const divs = document.querySelectorAll("div");
 
   divs.forEach((div) => {
-    if (div.childNodes.length === 1 && div.childNodes[0].nodeType === Node.TEXT_NODE) {
-      const originalText = div.textContent.trim();
-
-      for (const [original, replacement] of Object.entries(replacements)) {
-        if (originalText.includes(original)) {
-          console.log(`Replacing "${original}" with "${replacement}" in element:`, div);
-          div.textContent = originalText.replace(new RegExp(original, "g"), replacement);
-        }
-      }
-    }
+    replaceTextRecursively(div);
   });
 }
 
-// Observe changes and replace text only in <div> tags
+// Observe changes and replace text only in visible content
 function observeAppElement() {
   const app = document.getElementById("app");
 
@@ -54,7 +60,7 @@ function observeAppElement() {
 
     // Set up a MutationObserver to monitor changes
     const observer = new MutationObserver(() => {
-      console.log("Mutation detected, re-running text replacement in <div> elements...");
+      console.log("Mutation detected, re-running text replacement...");
       replaceTextInDivs();
     });
 
