@@ -21,22 +21,23 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Log the current URL to confirm the script is attached to the right page
-console.log("Content script loaded on:", window.location.href);
-
-// Function to replace text content
+// Function to safely replace text content
 function replaceTextContent() {
   console.log("Running text replacement...");
-  
+
   // Select all text-containing elements (e.g., div, span, p, a, td)
   const elements = document.querySelectorAll("div, span, p, a, td");
-  
+
   elements.forEach((element) => {
-    // Loop through replacements and apply them if the text matches
-    for (const [original, replacement] of Object.entries(replacements)) {
-      if (element.innerText && element.innerText.includes(original)) {
-        console.log(`Replacing "${original}" with "${replacement}" in element:`, element);
-        element.innerText = element.innerText.replace(new RegExp(original, "g"), replacement);
+    if (element.childNodes.length === 1 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
+      // Only replace if the element contains a single text node
+      const originalText = element.textContent;
+
+      for (const [original, replacement] of Object.entries(replacements)) {
+        if (originalText.includes(original)) {
+          console.log(`Replacing "${original}" with "${replacement}" in element:`, element);
+          element.textContent = originalText.replace(new RegExp(original, "g"), replacement);
+        }
       }
     }
   });
@@ -66,12 +67,6 @@ function observeAppElement() {
     setTimeout(observeAppElement, 1000); // Retry after 1 second if #app is not found
   }
 }
-
-// Fallback: Run text replacement on an interval (React-safe)
-setInterval(() => {
-  console.log("Running periodic text replacement...");
-  replaceTextContent();
-}, 3000); // Runs every 3 seconds
 
 // Wait for the DOM to fully load
 document.addEventListener("DOMContentLoaded", () => {
