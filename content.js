@@ -21,10 +21,11 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Function to replace text in a node
+// Function to log and replace text in a node
 function replaceTextInNode(node) {
   for (const [original, replacement] of Object.entries(replacements)) {
     if (node.nodeValue.includes(original)) {
+      console.log(`Replacing "${original}" with "${replacement}"`);
       node.nodeValue = node.nodeValue.replace(new RegExp(original, 'g'), replacement);
     }
   }
@@ -33,6 +34,7 @@ function replaceTextInNode(node) {
 // Walk through the DOM and replace text
 function walkDOM(node) {
   if (node.nodeType === Node.TEXT_NODE) {
+    console.log(`Text node detected: "${node.nodeValue.trim()}"`);
     replaceTextInNode(node);
   } else {
     node.childNodes.forEach(walkDOM);
@@ -44,6 +46,8 @@ function observeAppElement() {
   const app = document.getElementById("app");
 
   if (app) {
+    console.log("App element detected: Starting text replacement");
+
     // Replace text in the initial render
     walkDOM(app);
 
@@ -52,8 +56,10 @@ function observeAppElement() {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
+            console.log("New element added to #app:", node);
             walkDOM(node);
           } else if (node.nodeType === Node.TEXT_NODE) {
+            console.log("New text node added:", node.nodeValue.trim());
             replaceTextInNode(node);
           }
         });
@@ -62,10 +68,14 @@ function observeAppElement() {
 
     // Observe changes in the #app element and its subtree
     observer.observe(app, { childList: true, subtree: true });
+    console.log("MutationObserver started for #app");
   } else {
-    console.error("#app element not found!");
+    console.error("#app element not found! Is the page fully loaded?");
   }
 }
 
 // Wait for the DOM to fully load
-document.addEventListener("DOMContentLoaded", observeAppElement);
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM fully loaded, starting script...");
+  observeAppElement();
+});
