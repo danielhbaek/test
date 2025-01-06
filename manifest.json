@@ -7,11 +7,11 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://example.com/*"
+    "https://app.seo.ai/page-analytics*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://example.com/*"],
+      "matches": ["https://app.seo.ai/page-analytics*"],
       "js": ["content.js"]
     }
   ]
