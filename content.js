@@ -21,14 +21,14 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Function to walk through all text nodes in the DOM
+// Function to replace text in a node
 function replaceTextInNode(node) {
   for (const [original, replacement] of Object.entries(replacements)) {
     node.nodeValue = node.nodeValue.replace(new RegExp(original, 'g'), replacement);
   }
 }
 
-// Walk through the DOM and replace text content
+// Walk through the DOM and replace text
 function walkDOM(node) {
   if (node.nodeType === Node.TEXT_NODE) {
     replaceTextInNode(node);
@@ -37,5 +37,21 @@ function walkDOM(node) {
   }
 }
 
-// Start replacing text on page load
+// Observe the DOM for dynamic changes
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    mutation.addedNodes.forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        walkDOM(node);
+      } else if (node.nodeType === Node.TEXT_NODE) {
+        replaceTextInNode(node);
+      }
+    });
+  });
+});
+
+// Start observing the DOM
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Perform initial walk through the DOM
 walkDOM(document.body);
