@@ -21,17 +21,19 @@ const replacements = {
   "/blog/how-to-make-chatgpt-undetectable": "/blog/how-to-choose-pet-friendly-vacations"
 };
 
-// Function to safely replace text content
-function replaceTextContent() {
+// Replace text in safe areas only
+function safeReplaceTextContent() {
   console.log("Running text replacement...");
 
-  // Select all text-containing elements (e.g., div, span, p, a, td)
+  // Use querySelectorAll to find visible static content
   const elements = document.querySelectorAll("div, span, p, a, td");
 
   elements.forEach((element) => {
     if (element.childNodes.length === 1 && element.childNodes[0].nodeType === Node.TEXT_NODE) {
-      // Only replace if the element contains a single text node
-      const originalText = element.textContent;
+      const originalText = element.textContent.trim();
+
+      // Skip empty or short text
+      if (!originalText || originalText.length < 3) return;
 
       for (const [original, replacement] of Object.entries(replacements)) {
         if (originalText.includes(original)) {
@@ -43,28 +45,34 @@ function replaceTextContent() {
   });
 }
 
-// Observe the #app element for dynamic changes
+// Observe changes and only run replacements in finalized content areas
 function observeAppElement() {
   const app = document.getElementById("app");
 
   if (app) {
     console.log("App element detected: Setting up MutationObserver");
 
-    // Run the replacement initially
-    replaceTextContent();
+    // Initial replacement
+    safeReplaceTextContent();
 
-    // Set up a MutationObserver to monitor for changes
-    const observer = new MutationObserver(() => {
-      console.log("Mutation detected, re-running text replacement...");
-      replaceTextContent();
+    // Set up a MutationObserver to monitor changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            console.log("New element added. Running replacement...");
+            safeReplaceTextContent();
+          }
+        });
+      });
     });
 
-    // Observe changes in the #app element and its subtree
+    // Observe the #app element and its subtree
     observer.observe(app, { childList: true, subtree: true });
     console.log("MutationObserver started for #app");
   } else {
     console.error("#app element not found! Retrying in 1 second...");
-    setTimeout(observeAppElement, 1000); // Retry after 1 second if #app is not found
+    setTimeout(observeAppElement, 1000);
   }
 }
 
