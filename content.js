@@ -1,6 +1,6 @@
 // Define a mapping of text to replace with pet supply-related examples
 const replacements = {
-  "Blog": "Pet Care Blog",
+  "Analytics": "Pet Care Blog",
   "Tools": "Pet Care Tools",
   "FAQ": "Pet FAQ",
   "PIM": "Pet Inventory Management",
